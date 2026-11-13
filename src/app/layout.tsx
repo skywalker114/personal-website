@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     description: profile.introduction,
     type: "website",
   },
-  robots: { index: false, follow: false }, // Enable once real content and domain are ready.
+  robots: { index: true, follow: true }, // Enable once real content and domain are ready.
 };
 
 export const viewport: Viewport = { themeColor: "#111513" };
