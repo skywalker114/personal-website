@@ -1,6 +1,6 @@
 # Harry — a personal space
 
-An English-first personal website for technology, experiments, writing, and the person behind them. Next.js App Router + TypeScript + React Three Fiber. Exports to static HTML for Cloudflare Pages; no paid service or API key is required for the included experiments.
+An English-first personal website for technology, experiments, writing, and the person behind them. Next.js App Router + TypeScript + React Three Fiber. Exports to static HTML for Cloudflare Workers Static Assets or Pages; no paid service or API key is required for the included experiments.
 
 ## The personal atlas
 
@@ -30,7 +30,7 @@ pnpm typecheck
 pnpm build
 ```
 
-The production build is the `out/` directory. Run `pnpm preview` (or `npm run preview`) to inspect it at http://127.0.0.1:3002. The included preview server binds only to localhost; production hosting is handled by Cloudflare Pages.
+The production build is the `out/` directory. Run `pnpm preview` (or `npm run preview`) to inspect it at http://127.0.0.1:3002. The included preview server binds only to localhost; production hosting is handled by Cloudflare.
 
 ## Make it personal
 
@@ -46,7 +46,22 @@ The immersive interface lives in `src/components/personal-map.tsx`, contact beha
 
 Before public launch, review the newly drafted copy and CV-reported outcomes, then change the `robots` metadata in `src/app/layout.tsx` to allow indexing. Add a canonical domain and social image once a real domain exists. The supplied CV's phone number and residency details are not included on the website, and the original PDF is not a public asset.
 
-## Deploy on Cloudflare Pages
+## Deploy on Cloudflare Workers
+
+The existing Cloudflare Worker project is named `personal-website`. The committed `wrangler.jsonc` tells Wrangler to upload the static `out/` directory and serve the exported `404.html` for missing routes. This explicit configuration avoids automatically adapting the project with OpenNext.
+
+Use these settings in the Worker's Git-connected build configuration:
+
+- Production branch: `main`
+- Root directory: the repository root
+- Build command: `npm run build` (or `pnpm build`)
+- Deploy command: `npx wrangler deploy`
+
+Commit and push `wrangler.jsonc` with the source; Cloudflare builds `out/` on each deployment, so keep `out/` ignored. The Worker name in the configuration must match the existing Cloudflare project. No Worker script or OpenNext adapter is needed for this static export.
+
+Official reference: https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/
+
+## Alternative: Cloudflare Pages
 
 This project uses `output: "export"`; it does not require a Next.js server or the Workers adapter.
 
@@ -57,7 +72,7 @@ This project uses `output: "export"`; it does not require a Next.js server or th
 
 Official reference: https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/
 
-No cloud account, GitHub remote, domain registration, or deployment has been created by this local implementation. Cloudflare is the intended hosting target; the source is portable.
+The local configuration does not create or deploy cloud resources. Cloudflare is the intended hosting target; the source is portable.
 
 ## Experiments and accessibility
 
