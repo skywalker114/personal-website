@@ -4,13 +4,15 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Component, useEffect, useMemo, useRef, type MutableRefObject, type ReactNode } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { cloudConnections, mapColors, type CloudPoint, type MapFilter } from "@/content/personal-map";
+import { cloudConnections, type CloudPoint, type MapFilter } from "@/content/personal-map";
+import { mapPalettes, type MapTheme } from "@/lib/map-theme";
 
 export type ViewCommand = { id: number; type: "reset" | "in" | "out" };
 type SceneProps = {
   points: CloudPoint[];
   filter: MapFilter;
   compact: boolean;
+  theme: MapTheme;
   selected: string;
   hovered: string | null;
   moving: boolean;
@@ -20,7 +22,8 @@ type SceneProps = {
   onFailure: () => void;
 };
 
-function Scatter({ points, filter, compact, selected, hovered, moving, viewCommand, labels }: SceneProps) {
+function Scatter({ points, filter, compact, theme, selected, hovered, moving, viewCommand, labels }: SceneProps) {
+  const colors = mapPalettes[theme];
   const { camera, gl, size, invalidate } = useThree();
   const controls = useRef<OrbitControls | null>(null);
   const dragging = useRef(false);
@@ -40,7 +43,7 @@ function Scatter({ points, filter, compact, selected, hovered, moving, viewComma
     const chapters: number[] = [], chapterColors: number[] = [], topics: number[] = [], topicColors: number[] = [];
     points.forEach(point => {
       (point.isChapter ? chapters : topics).push(...locations.get(point.id)!.toArray());
-      (point.isChapter ? chapterColors : topicColors).push(...new THREE.Color(mapColors[point.kind]).toArray());
+      (point.isChapter ? chapterColors : topicColors).push(...new THREE.Color(colors[point.kind]).toArray());
     });
     const normalLines: number[] = [], activeLines: number[] = [], activeColors: number[] = [];
     const focus = hovered || selected;
@@ -50,7 +53,7 @@ function Scatter({ points, filter, compact, selected, hovered, moving, viewComma
       const active = focus !== "harry" && (from === focus || to === focus);
       (active ? activeLines : normalLines).push(...a.toArray(), ...b.toArray());
       if (active) {
-        const color = new THREE.Color(mapColors[points.find(point => point.id === to)!.kind]);
+        const color = new THREE.Color(colors[points.find(point => point.id === to)!.kind]);
         activeColors.push(...color.toArray(), ...color.toArray());
       }
     });
@@ -68,7 +71,7 @@ function Scatter({ points, filter, compact, selected, hovered, moving, viewComma
       normalLines: new Float32Array(normalLines), activeLines: new Float32Array(activeLines), activeColors: new Float32Array(activeColors),
       background: new Float32Array(background),
     };
-  }, [points, filter, selected, hovered, compact]);
+  }, [points, filter, selected, hovered, compact, colors]);
 
   useEffect(() => {
     const orbit = new OrbitControls(camera, gl.domElement);
@@ -121,7 +124,7 @@ function Scatter({ points, filter, compact, selected, hovered, moving, viewComma
     invalidate();
   }, [viewCommand, camera, fitDistance, initialDirection, invalidate]);
 
-  useEffect(() => { invalidate(); }, [points, selected, hovered, moving, invalidate]);
+  useEffect(() => { invalidate(); }, [points, selected, hovered, moving, theme, invalidate]);
 
   useFrame((state, delta) => {
     const orbit = controls.current;
@@ -139,7 +142,7 @@ function Scatter({ points, filter, compact, selected, hovered, moving, viewComma
       return [{ point, element, x: (projection.x * .5 + .5) * size.width, y: (-projection.y * .5 + .5) * size.height, distance, scale: THREE.MathUtils.clamp(fitDistance / distance, .72, 1.18), priority: point.isChapter ? 0 : 1 }];
     }).sort((a, b) => a.priority - b.priority || a.distance - b.distance);
     const placed: { x: number; y: number; w: number; h: number }[] = [];
-    const topSafe = compact ? 128 : 102;
+    const topSafe = compact ? 158 : size.width <= 1200 ? 172 : 132;
     const bottomSafe = 82;
     for (const entry of projected) {
       const { element, point, scale, distance } = entry;
@@ -166,19 +169,20 @@ function Scatter({ points, filter, compact, selected, hovered, moving, viewComma
       element.style.left = `${displayX / size.width * 100}%`;
       element.style.top = `${displayY / size.height * 100}%`;
       element.style.setProperty("--depth-scale", String(scale));
-      element.style.opacity = String(point.id === selected || point.id === hovered ? 1 : THREE.MathUtils.clamp(1.22 - (distance - fitDistance + 2.4) * .105, point.isChapter ? .57 : .38, 1));
+      const minimumOpacity = theme === "day" ? (point.isChapter ? .95 : .9) : (point.isChapter ? .57 : .38);
+      element.style.opacity = String(point.id === selected || point.id === hovered ? 1 : THREE.MathUtils.clamp(1.22 - (distance - fitDistance + 2.4) * .105, minimumOpacity, 1));
       element.style.zIndex = String(600 - Math.round(distance * 20) + (point.id === selected || point.id === hovered ? 300 : 0));
     }
   });
 
   const focus = locations.get(selected);
   return <>
-    <points><bufferGeometry><bufferAttribute attach="attributes-position" args={[background, 3]} /></bufferGeometry><pointsMaterial color="#b7ceae" size={.015} transparent opacity={.32} /></points>
-    <lineSegments><bufferGeometry><bufferAttribute attach="attributes-position" args={[normalLines, 3]} /></bufferGeometry><lineBasicMaterial color="#a9c2a1" transparent opacity={.20} /></lineSegments>
+    <points><bufferGeometry><bufferAttribute attach="attributes-position" args={[background, 3]} /></bufferGeometry><pointsMaterial color={theme === "day" ? "#627b58" : "#b7ceae"} size={.015} transparent opacity={.32} /></points>
+    <lineSegments><bufferGeometry><bufferAttribute attach="attributes-position" args={[normalLines, 3]} /></bufferGeometry><lineBasicMaterial color={theme === "day" ? "#637961" : "#a9c2a1"} transparent opacity={theme === "day" ? .32 : .20} /></lineSegments>
     <lineSegments><bufferGeometry><bufferAttribute attach="attributes-position" args={[activeLines, 3]} /><bufferAttribute attach="attributes-color" args={[activeColors, 3]} /></bufferGeometry><lineBasicMaterial vertexColors transparent opacity={.72} /></lineSegments>
     <points><bufferGeometry><bufferAttribute attach="attributes-position" args={[topics, 3]} /><bufferAttribute attach="attributes-color" args={[topicColors, 3]} /></bufferGeometry><pointsMaterial vertexColors size={.035} transparent opacity={.85} /></points>
     <points><bufferGeometry><bufferAttribute attach="attributes-position" args={[chapters, 3]} /><bufferAttribute attach="attributes-color" args={[chapterColors, 3]} /></bufferGeometry><pointsMaterial vertexColors size={.075} transparent opacity={1} /></points>
-    {focus && <mesh position={focus}><sphereGeometry args={[.085, 14, 14]} /><meshBasicMaterial color={mapColors[points.find(point => point.id === selected)!.kind]} transparent opacity={.35} /></mesh>}
+    {focus && <mesh position={focus}><sphereGeometry args={[.085, 14, 14]} /><meshBasicMaterial color={colors[points.find(point => point.id === selected)!.kind]} transparent opacity={.35} /></mesh>}
   </>;
 }
 
