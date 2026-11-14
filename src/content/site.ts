@@ -103,6 +103,22 @@ export const projects = [
     perspective: "An abstraction is easier to reason about when its lower layers become visible. Parsing and translation connect the structure of a program with the execution model beneath it.",
     repository: "",
   },
+  {
+    slug: "cpp-sorting-search",
+    title: "Small steps. A different order.",
+    shortTitle: "C++ sorting & search exercises",
+    category: "ALGORITHMS & FUNDAMENTALS",
+    number: "04",
+    visual: "sorting",
+    role: "Developer · Public coursework",
+    description: "Bubble sort, quicksort and recursive binary search, with an animated look at the steps behind sorting.",
+    tags: ["C++", "Sorting", "Recursive search"],
+    outcome: "Public implementations of bubble sort, quicksort and recursive binary search.",
+    overview: "This public coursework repository collects sorting and search implementations in C++. The examples provide a small, inspectable view of algorithmic thinking, from comparing neighbouring values to narrowing a search recursively.",
+    contributions: ["Implemented bubble sort and quicksort exercises in C++.", "Worked with recursive binary search.", "Published the practice files and headers in the prac7 repository."],
+    perspective: "A short sequence is enough to make an algorithm tangible. Seeing the comparisons, swaps and stopping conditions makes the source easier to reason about.",
+    repository: "https://github.com/skywalker114/prac7",
+  },
 ];
 
 export const publicCode = {

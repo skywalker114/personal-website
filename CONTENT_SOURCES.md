@@ -1,6 +1,6 @@
 # Content provenance
 
-Updated 13 November 2026. The website is still local; no cloud deployment was performed.
+Updated 14 November 2026. The previous version is deployed; the expanded stories and animated illustrations in this revision are for local review.
 
 ## Supplied CV
 
@@ -33,8 +33,14 @@ The public prac7 tree contains BubbleSort.cpp, QuickSort.cpp, RecursiveBinarySea
 
 ## Website experiments
 
-The personal atlas uses only the existing CV/profile facts: four building points (three CV projects and the verified C++ coursework), three work points, two study points, and one Roman archaeology point. Connections represent shared categories and interests, rather than undocumented employer/project relationships. The site remains local.
+The personal atlas uses only the existing CV/profile facts: four building points (three CV projects and the verified C++ coursework), three work points, two study points, and one Roman archaeology point. Connections represent shared categories and interests, rather than undocumented employer/project relationships.
 
 The 3D story projector adds topic words from the already documented skills and research subjects. Coordinates are curated and deterministic; no Word2Vec training, text-embedding request, or t-SNE computation has taken place. Topic words select the relevant existing chapter, rather than implying additional jobs or projects.
 
 The landing page presents only the immersive story space. Biographical material and its education/work anchors are available on `/about/`. Earlier decorative experiments are not represented as historical CV projects. No Hugging Face model demo or AI assistant is claimed to be connected.
+
+## Expanded stories and illustrations
+
+The 11 main points have newly drafted editorial summaries in `src/content/story-details.ts`. Their factual content comes from the same CV and verified repository facts above. No new employers, qualifications, project technologies, measured outcomes or personal hobbies were invented. Reflections connecting these chapters are website copy for Harry to review.
+
+The CTF, attendance and VM diagrams are illustrative workflows using sample scores, times and instructions. They are not recordings of the original software, production data or independently measured results. The sorting animation runs a separate browser bubble-sort implementation on five example values; it does not claim to execute the C++ repository. The verified C++ coursework has a new case-study route and retains its real repository link.

@@ -5,10 +5,12 @@ import { ArrowUpRight, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { cloudPoints, mapCategories, mapConnections, mapPosition, personalMap, type MapFilter, type MapKind } from "@/content/personal-map";
 import { profile } from "@/content/site";
+import { storyDetails } from "@/content/story-details";
 import { mapPalettes, mapThemeAt, type MapTheme } from "@/lib/map-theme";
 import type { ViewCommand } from "./personal-map-scene";
 
 const Scene = dynamic(() => import("./personal-map-scene"), { ssr: false });
+const ProjectMotion = dynamic(() => import("./project-motion"));
 const kindNames: Record<MapKind, string> = { person: "THE PERSON", project: "BUILDING", work: "WORKING", study: "LEARNING", life: "BEYOND CODE" };
 
 export default function PersonalMap({ onContact }: { onContact: () => void }) {
@@ -76,6 +78,7 @@ export default function PersonalMap({ onContact }: { onContact: () => void }) {
   const activeId = pinnedId || previewId;
   const activePoint = cloudPoints.find(point => point.id === activeId);
   const chapter = activePoint ? personalMap.find(node => node.id === activePoint.chapterId)! : null;
+  const story = chapter ? storyDetails[chapter.id] : null;
   const moving = !capability.reduced && pageVisible && !pinnedId;
   const related = chapter ? personalMap.filter(node => node.kind === chapter.kind && node.id !== chapter.id).slice(0, 3) : [];
 
@@ -111,7 +114,10 @@ export default function PersonalMap({ onContact }: { onContact: () => void }) {
   }
 
   useEffect(() => {
-    if (pinnedId) closeButton.current?.focus({ preventScroll: true });
+    if (pinnedId) {
+      closeButton.current?.focus({ preventScroll: true });
+      if (popup.current) popup.current.scrollTop = 0;
+    }
   }, [pinnedId]);
 
   useEffect(() => {
@@ -132,13 +138,13 @@ export default function PersonalMap({ onContact }: { onContact: () => void }) {
       if (card && anchor) {
         if (capability.compact) {
           card.style.left = "16px"; card.style.right = "16px";
-          card.style.bottom = "77px"; card.style.top = "auto";
+          card.style.bottom = "20px"; card.style.top = "auto";
         } else {
           const rect = anchor.getBoundingClientRect();
           const width = card.offsetWidth, height = card.offsetHeight;
           let left = rect.right + 18;
           if (left + width > window.innerWidth - 26) left = rect.left - width - 18;
-          const top = Math.max(110, Math.min(rect.top - 30, window.innerHeight - height - 76));
+          const top = Math.max(window.innerWidth <= 1200 ? 166 : 120, Math.min(rect.top - 30, window.innerHeight - height - 32));
           card.style.left = `${Math.max(24, Math.min(left, window.innerWidth - width - 24))}px`;
           card.style.top = `${top}px`; card.style.right = "auto"; card.style.bottom = "auto";
         }
@@ -200,7 +206,16 @@ export default function PersonalMap({ onContact }: { onContact: () => void }) {
       <div className="space-info-top"><span>{kindNames[chapter.kind]}{!activePoint.isChapter?` / ${activePoint.label}`:""}</span>{pinnedId&&<button ref={closeButton} className="space-info-close" onClick={()=>closeInfo(true)} aria-label="Close story details"><X size={17}/></button>}</div>
       <h2 id="space-info-title">{chapter.title}</h2><p className="space-info-subtitle">{chapter.subtitle}</p>
       <p className="space-info-description">{chapter.description}</p>
-      {pinnedId?<><p className="space-info-detail">{chapter.detail}</p>{chapter.skills.length>0&&<div className="space-info-skills">{chapter.skills.map(skill=><span key={skill}>{skill}</span>)}</div>}{related.length>0&&<div className="space-info-related"><span>CONNECTED STORIES</span>{related.map(node=><button key={node.id} onClick={()=>pinPoint(node.id)}>{node.label}<ArrowUpRight size={11}/></button>)}</div>}<a className="space-info-link" href={chapter.href} target={chapter.external?"_blank":undefined} rel={chapter.external?"noopener noreferrer":undefined}>{chapter.linkLabel}<ArrowUpRight size={15}/></a></>:<span className="space-preview-hint">Click the point to explore <ArrowUpRight size={11}/></span>}
+      {pinnedId?<>
+        <a className="space-info-link" href={chapter.href} target={chapter.external?"_blank":undefined} rel={chapter.external?"noopener noreferrer":undefined}>{chapter.linkLabel}<ArrowUpRight size={15}/></a>
+        {story?.motion && <ProjectMotion key={chapter.id} kind={story.motion} compact />}
+        {story && <dl className="space-story-facts">{story.facts.map(fact => <div key={fact.label}><dt>{fact.label}</dt><dd>{fact.value}</dd></div>)}</dl>}
+        {story?.sections.map(section => <section className="space-story-section" key={section.title}><h3>{section.title}</h3><p>{section.text}</p></section>)}
+        <p className="space-info-detail">{chapter.detail}</p>
+        {chapter.skills.length>0&&<div className="space-info-skills">{chapter.skills.map(skill=><span key={skill}>{skill}</span>)}</div>}
+        {story?.evidence && <p className="space-story-evidence">{story.evidence}</p>}
+        {related.length>0&&<div className="space-info-related"><span>CONNECTED STORIES</span>{related.map(node=><button key={node.id} onClick={()=>pinPoint(node.id)}>{node.label}<ArrowUpRight size={11}/></button>)}</div>}
+      </>:<span className="space-preview-hint">Click the point to explore <ArrowUpRight size={11}/></span>}
     </div>}
 
     <p className="sr-only" role="status">{pinnedId&&chapter?`Opened ${chapter.title}`:""}</p>

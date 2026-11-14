@@ -14,6 +14,8 @@ This is an **embedding-projector-style visualization**, not a claim that Word2Ve
 
 The full biography, education, work chapters, toolkit and notes index live at `/about/`. Work and study links target that page's matching anchors. Individual project and note pages remain accessible from the floating story details. The contact dialog is available from the minimal header.
 
+Selecting a main point opens a longer story with facts, context and connected chapters. The four project points also include lightweight animated SVG illustrations: CTF submissions and scoring, attendance recording and reporting, VM stack translation, and a working bubble-sort trace. Each illustration has pause/play and restart controls, respects reduced-motion preferences and suspends its timer while offscreen or in a hidden tab. Example values are labelled as illustrations. Full project pages expand the context and contributions; the C++ exercises now have a local case study at `/projects/cpp-sorting-search/` with a link to the verified source repository.
+
 ## Run locally
 
 The homepage uses a bright palette from 07:00 to 19:00 in each visitor's device time zone, and the original dark palette at night. It rechecks every minute and when the tab regains focus. Add `?theme=day` or `?theme=night` to the homepage URL to preview either appearance; the plain URL uses automatic timing. This needs no location permission or external service.

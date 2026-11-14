@@ -59,7 +59,7 @@ export const personalMap: MapNode[] = [
     id: "cpp", kind: "project", label: "C++ foundations", title: publicCode.title,
     subtitle: "Public code · skywalker114", description: publicCode.description,
     detail: "An open look at the fundamentals: sorting, searching and recursive thinking.",
-    skills: ["C++", "Sorting", "Recursive search"], href: publicCode.url, external: true, linkLabel: "View the source",
+    skills: ["C++", "Sorting", "Recursive search"], href: "/projects/cpp-sorting-search/", linkLabel: "Explore the algorithms",
     position: [-.43, -.28, .2], compactPosition: [-.72, -.20, .2],
   },
   {
