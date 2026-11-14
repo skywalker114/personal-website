@@ -150,7 +150,9 @@ function Scatter({ points, filter, compact, selected, hovered, moving, viewComma
       const x = locked ? parseFloat(element.style.left) / 100 * size.width : THREE.MathUtils.clamp(entry.x + 8, 12, Math.max(12, size.width - width - 12));
       let y = locked ? parseFloat(element.style.top) / 100 * size.height : THREE.MathUtils.clamp(entry.y, topSafe, size.height - bottomSafe);
       // Keep words legible as perspective changes, without removing any story.
-      for (const offset of locked ? [] : [0, -24, 24, -48, 48, -72, 72, -96, 96, -120, 120]) {
+      const labelGap = Math.max(24, Math.ceil(height + 6));
+      for (const step of locked ? [] : [0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5]) {
+        const offset = step * labelGap;
         const candidate = THREE.MathUtils.clamp(entry.y + offset, topSafe, size.height - bottomSafe);
         const overlap = placed.some(box => x < box.x + box.w + 4 && x + width + 4 > box.x && candidate - height / 2 < box.y + box.h + 3 && candidate + height / 2 > box.y - 3);
         if (!overlap) { y = candidate; break; }
