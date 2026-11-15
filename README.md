@@ -8,7 +8,7 @@ The homepage is one full-viewport 3D space. Harry is the central point, connecte
 
 `src/content/personal-map.ts` holds the semantic points, thematic connections and curated XYZ story coordinates. `src/components/personal-map.tsx` provides accessible HTML word buttons, filtering and temporary point-anchored information. `personal-map-scene.tsx` renders the perspective scatter plot with Three.js BufferGeometry/Points and connecting lines. There is no enclosing chart frame, floor grid or axis overlay. OrbitControls provides automatic rotation, mouse/touch orbiting and wheel/pinch zoom. The bottom instruction text and toolbar are omitted for a clean view. Hover pauses rotation and holds the labels steady; click details pause rotation until dismissed. Label positions ease between updates, and size and opacity follow depth.
 
-The nineteen story chapters plus Harry's central point have 39 related skill/research words, for 59 plotted points in the complete view. The Everything view labels the 20 main chapters; desktop category views also reveal their topic labels. Topic words open their parent story. On small screens the 3D plot and automatic rotation remain available at a lower pixel ratio, while topic labels are hidden for readability. Pressing a point opens a temporary bottom sheet without scrolling away from the space. Reduced-motion preferences disable automatic rotation while preserving manual orbiting and zoom. The SVG fallback keeps the chapter buttons and stories available if WebGL fails.
+The nineteen story chapters plus Harry's central point have 39 related skill/research words, for 59 plotted points in the complete view. The Everything view labels the 20 main chapters; desktop category views also reveal their topic labels. Topic words open their parent story. On small screens the 3D plot and automatic rotation remain available at a lower pixel ratio, while topic labels are hidden for readability. Mobile words keep a constant size and opacity; their collision offsets persist between frames, and visible positions ease after layout instead of jumping to a free slot. Label measurements are batched before style writes. Pressing a point opens a temporary bottom sheet without scrolling away from the space. Reduced-motion preferences disable automatic rotation while preserving manual orbiting and zoom. The SVG fallback keeps the chapter buttons and stories available if WebGL fails.
 
 This is an **embedding-projector-style visualization**, not a claim that Word2Vec or t-SNE has been run. Story positions are explicitly curated in `storyCoordinates`, and the surrounding topic coordinates are deterministically generated near their parent. A future offline embedding/t-SNE pipeline can replace those coordinates without changing the story interface.
 
@@ -35,6 +35,8 @@ Open http://127.0.0.1:3000. With npm, use `npm install` and `npm run dev` instea
 pnpm typecheck
 pnpm build
 ```
+
+Run `node scripts/check-mobile-labels.mjs` to replay 45 seconds of projected rotation at three phone sizes, check bounded label movement, and verify that a stopped scene settles. It also reports target collisions in the most crowded layouts; smoothing can temporarily let words overlap as they reposition.
 
 The production build is the `out/` directory. Run `pnpm preview` (or `npm run preview`) to inspect it at http://127.0.0.1:3002. The included preview server binds only to localhost; production hosting is handled by Cloudflare.
 

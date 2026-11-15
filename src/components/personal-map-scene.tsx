@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { cloudConnections, type CloudPoint, type MapFilter } from "@/content/personal-map";
 import { mapPalettes, type MapTheme } from "@/lib/map-theme";
+import { advanceCompactLabel, layoutCompactLabels, type CompactLabelPlacement } from "@/lib/compact-label-layout";
 
 export type ViewCommand = { id: number; type: "reset" | "in" | "out" };
 type SceneProps = {
@@ -31,6 +32,7 @@ function Scatter({ points, filter, compact, theme, selected, hovered, moving, vi
   const initialDirection = useMemo(() => new THREE.Vector3(.26, .2, 1).normalize(), []);
   const projection = useMemo(() => new THREE.Vector3(), []);
   const labelPositions = useRef(new Map<string, { x: number; y: number }>());
+  const compactPlacements = useRef(new Map<string, CompactLabelPlacement>());
   const { locations, chapters, chapterColors, topics, topicColors, normalLines, activeLines, activeColors, background } = useMemo(() => {
     const locations = new Map<string, THREE.Vector3>();
     const center = new THREE.Vector3();
@@ -139,14 +141,21 @@ function Scatter({ points, filter, compact, theme, selected, hovered, moving, vi
       const position = locations.get(point.id)!;
       projection.copy(position).project(state.camera);
       const distance = position.distanceTo(state.camera.position);
-      return [{ point, element, x: (projection.x * .5 + .5) * size.width, y: (-projection.y * .5 + .5) * size.height, distance, scale: THREE.MathUtils.clamp(fitDistance / distance, .72, 1.18), priority: point.kind === "person" ? -1 : point.isChapter ? 0 : 1 }];
+      const scale = compact ? 1 : THREE.MathUtils.clamp(fitDistance / distance, .72, 1.18);
+      // Batch all layout reads before any per-label style writes.
+      return [{ point, element, x: (projection.x * .5 + .5) * size.width, y: (-projection.y * .5 + .5) * size.height, distance, scale, width: element.offsetWidth * scale, height: element.offsetHeight * scale, priority: point.kind === "person" ? -1 : point.isChapter ? 0 : 1 }];
     }).sort((a, b) => a.priority - b.priority);
     const placed: { x: number; y: number; w: number; h: number }[] = [];
     const topSafe = compact ? 158 : size.width <= 1000 ? 172 : 132;
     const bottomSafe = 82;
+    const compactTargets = compact && !hovered ? layoutCompactLabels(
+      projected.map(entry => ({ id: entry.point.id, x: entry.x + 8, y: entry.y, width: entry.width, height: entry.height })),
+      compactPlacements.current,
+      { width: size.width, height: size.height, top: topSafe, bottom: bottomSafe },
+    ) : null;
+    if (compactTargets) compactPlacements.current = compactTargets;
     for (const entry of projected) {
-      const { element, point, scale, distance } = entry;
-      const width = element.offsetWidth * scale, height = element.offsetHeight * scale;
+      const { element, point, scale, distance, width, height } = entry;
       // Freeze the complete label arrangement during hover/focus. Keeping only
       // the hovered word fixed still lets another label move under the pointer.
       const locked = Boolean(hovered) && element.style.left.endsWith("%") && element.style.top.endsWith("%");
@@ -154,12 +163,18 @@ function Scatter({ points, filter, compact, theme, selected, hovered, moving, vi
       const maxX = Math.max(12, size.width - width - 12);
       const x = THREE.MathUtils.clamp(entry.x + 8, 12, maxX);
       const y = THREE.MathUtils.clamp(entry.y, minY, maxY);
-      const previous = labelPositions.current.get(point.id) || { x, y };
+      const lastDisplay = labelPositions.current.get(point.id);
+      const previous = lastDisplay || { x, y };
       let displayX = locked ? parseFloat(element.style.left) / 100 * size.width : THREE.MathUtils.damp(previous.x, x, 12, Math.min(delta, .05));
       let displayY = locked ? parseFloat(element.style.top) / 100 * size.height : THREE.MathUtils.damp(previous.y, y, 12, Math.min(delta, .05));
       // Resolve the displayed rectangles after easing, so words cannot cross
       // through one another on their way to a non-overlapping target.
-      if (!locked) {
+      const compactTarget = compactTargets?.get(point.id);
+      if (!locked && compactTarget) {
+        const next = advanceCompactLabel(lastDisplay, compactTarget, delta);
+        displayX = THREE.MathUtils.clamp(next.x, 12, maxX);
+        displayY = THREE.MathUtils.clamp(next.y, minY, maxY);
+      } else if (!locked) {
         displayX = THREE.MathUtils.clamp(displayX, 12, maxX);
         displayY = THREE.MathUtils.clamp(displayY, minY, maxY);
         const overlaps = (cx: number, cy: number) => placed.some(box => cx < box.x + box.w + 6 && cx + width + 6 > box.x && cy - height / 2 < box.y + box.h + 6 && cy + height / 2 > box.y - 6);
@@ -176,12 +191,12 @@ function Scatter({ points, filter, compact, theme, selected, hovered, moving, vi
       }
       placed.push({ x: displayX, y: displayY - height / 2, w: width, h: height });
       labelPositions.current.set(point.id, { x: displayX, y: displayY });
-      if (!moving && !locked && Math.hypot(displayX - x, displayY - y) > .1) invalidate();
+      if (!moving && !locked && Math.hypot(displayX - (compactTarget?.x ?? x), displayY - (compactTarget?.y ?? y)) > .1) invalidate();
       element.style.left = `${displayX / size.width * 100}%`;
       element.style.top = `${displayY / size.height * 100}%`;
       element.style.setProperty("--depth-scale", String(scale));
       const minimumOpacity = theme === "day" ? (point.isChapter ? .95 : .9) : (point.isChapter ? .57 : .38);
-      element.style.opacity = String(point.id === selected || point.id === hovered ? 1 : THREE.MathUtils.clamp(1.22 - (distance - fitDistance + 2.4) * .105, minimumOpacity, 1));
+      element.style.opacity = String(compact || point.id === selected || point.id === hovered ? 1 : THREE.MathUtils.clamp(1.22 - (distance - fitDistance + 2.4) * .105, minimumOpacity, 1));
       element.style.zIndex = String(600 - Math.round(distance * 20) + (point.id === selected || point.id === hovered ? 300 : 0));
     }
   });
