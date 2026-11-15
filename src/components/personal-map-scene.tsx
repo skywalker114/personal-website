@@ -139,10 +139,10 @@ function Scatter({ points, filter, compact, theme, selected, hovered, moving, vi
       const position = locations.get(point.id)!;
       projection.copy(position).project(state.camera);
       const distance = position.distanceTo(state.camera.position);
-      return [{ point, element, x: (projection.x * .5 + .5) * size.width, y: (-projection.y * .5 + .5) * size.height, distance, scale: THREE.MathUtils.clamp(fitDistance / distance, .72, 1.18), priority: point.isChapter ? 0 : 1 }];
-    }).sort((a, b) => a.priority - b.priority || a.distance - b.distance);
+      return [{ point, element, x: (projection.x * .5 + .5) * size.width, y: (-projection.y * .5 + .5) * size.height, distance, scale: THREE.MathUtils.clamp(fitDistance / distance, .72, 1.18), priority: point.kind === "person" ? -1 : point.isChapter ? 0 : 1 }];
+    }).sort((a, b) => a.priority - b.priority);
     const placed: { x: number; y: number; w: number; h: number }[] = [];
-    const topSafe = compact ? 158 : size.width <= 1200 ? 172 : 132;
+    const topSafe = compact ? 158 : size.width <= 1000 ? 172 : 132;
     const bottomSafe = 82;
     for (const entry of projected) {
       const { element, point, scale, distance } = entry;
@@ -150,20 +150,31 @@ function Scatter({ points, filter, compact, theme, selected, hovered, moving, vi
       // Freeze the complete label arrangement during hover/focus. Keeping only
       // the hovered word fixed still lets another label move under the pointer.
       const locked = Boolean(hovered) && element.style.left.endsWith("%") && element.style.top.endsWith("%");
-      const x = locked ? parseFloat(element.style.left) / 100 * size.width : THREE.MathUtils.clamp(entry.x + 8, 12, Math.max(12, size.width - width - 12));
-      let y = locked ? parseFloat(element.style.top) / 100 * size.height : THREE.MathUtils.clamp(entry.y, topSafe, size.height - bottomSafe);
-      // Keep words legible as perspective changes, without removing any story.
-      const labelGap = Math.max(24, Math.ceil(height + 6));
-      for (const step of locked ? [] : [0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5]) {
-        const offset = step * labelGap;
-        const candidate = THREE.MathUtils.clamp(entry.y + offset, topSafe, size.height - bottomSafe);
-        const overlap = placed.some(box => x < box.x + box.w + 4 && x + width + 4 > box.x && candidate - height / 2 < box.y + box.h + 3 && candidate + height / 2 > box.y - 3);
-        if (!overlap) { y = candidate; break; }
-      }
-      placed.push({ x, y: y - height / 2, w: width, h: height });
+      const minY = topSafe + height / 2, maxY = Math.max(minY, size.height - bottomSafe - height / 2);
+      const maxX = Math.max(12, size.width - width - 12);
+      const x = THREE.MathUtils.clamp(entry.x + 8, 12, maxX);
+      const y = THREE.MathUtils.clamp(entry.y, minY, maxY);
       const previous = labelPositions.current.get(point.id) || { x, y };
-      const displayX = locked ? x : THREE.MathUtils.damp(previous.x, x, 18, Math.min(delta, .05));
-      const displayY = locked ? y : THREE.MathUtils.damp(previous.y, y, 18, Math.min(delta, .05));
+      let displayX = locked ? parseFloat(element.style.left) / 100 * size.width : THREE.MathUtils.damp(previous.x, x, 12, Math.min(delta, .05));
+      let displayY = locked ? parseFloat(element.style.top) / 100 * size.height : THREE.MathUtils.damp(previous.y, y, 12, Math.min(delta, .05));
+      // Resolve the displayed rectangles after easing, so words cannot cross
+      // through one another on their way to a non-overlapping target.
+      if (!locked) {
+        displayX = THREE.MathUtils.clamp(displayX, 12, maxX);
+        displayY = THREE.MathUtils.clamp(displayY, minY, maxY);
+        const overlaps = (cx: number, cy: number) => placed.some(box => cx < box.x + box.w + 6 && cx + width + 6 > box.x && cy - height / 2 < box.y + box.h + 6 && cy + height / 2 > box.y - 6);
+        if (overlaps(displayX, displayY)) {
+          const candidatesX = [displayX, x, 12, maxX];
+          const candidatesY = [displayY, y, minY, maxY, ...placed.flatMap(box => [box.y - height / 2 - 7, box.y + box.h + height / 2 + 7])].filter(cy => cy >= minY && cy <= maxY);
+          let best: { x: number; y: number; cost: number } | undefined;
+          for (const cx of candidatesX) for (const cy of candidatesY) {
+            const cost = (cx - displayX) ** 2 + (cy - displayY) ** 2;
+            if ((!best || cost < best.cost) && !overlaps(cx, cy)) best = { x: cx, y: cy, cost };
+          }
+          if (best) { displayX = best.x; displayY = best.y; }
+        }
+      }
+      placed.push({ x: displayX, y: displayY - height / 2, w: width, h: height });
       labelPositions.current.set(point.id, { x: displayX, y: displayY });
       if (!moving && !locked && Math.hypot(displayX - x, displayY - y) > .1) invalidate();
       element.style.left = `${displayX / size.width * 100}%`;

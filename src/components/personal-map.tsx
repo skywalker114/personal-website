@@ -73,7 +73,7 @@ export default function PersonalMap({ onContact }: { onContact: () => void }) {
 
   const visibleNodes = useMemo(() => personalMap.filter(node => filter === "all" || node.kind === "person" || node.kind === filter), [filter]);
   const visiblePoints = useMemo(() => cloudPoints.filter(point => filter === "all" || point.kind === "person" || point.kind === filter), [filter]);
-  const showTopics = !capability.compact;
+  const showTopics = !capability.compact && filter !== "all";
   const labelPoints = sceneReady && showTopics ? visiblePoints : visiblePoints.filter(point => point.isChapter);
   const activeId = pinnedId || previewId;
   const activePoint = cloudPoints.find(point => point.id === activeId);
@@ -181,8 +181,14 @@ export default function PersonalMap({ onContact }: { onContact: () => void }) {
   return <section className="space-shell" data-theme={theme} id="map" aria-label="Harry Tang's interactive 3D story space">
     <h1 className="sr-only">{profile.fullName} — a life in three dimensions</h1>
     <a className="skip-link" href="/about/">Read my story as a page</a>
-    <header className="space-header"><a href="/" className="space-brand" aria-label="Harry Tang, home">harry<span>.</span></a><span className="space-byline">A LIFE, CONNECTED.</span><div><a href="/about/">About</a><button onClick={()=>{closeInfo();onContact();}}>Say hello <ArrowUpRight size={13} /></button></div></header>
-    <nav className="space-navigation" aria-label="Explore by theme">{mapCategories.map(category => <button key={category.id} aria-pressed={filter === category.id} onClick={()=>chooseCategory(category.id)} style={{"--node-color":category.id === "all" ? colors.person : colors[category.id]} as CSSProperties}><i />{category.label}</button>)}</nav>
+    <header className="space-header">
+      <div className="space-identity">
+        <a href="/" className="space-brand" aria-label="Harry Tang, home">harry<span>.</span></a>
+        <span className="space-byline">A LIFE, CONNECTED.</span>
+      </div>
+      <div className="space-actions"><a href="/about/">About</a><button onClick={()=>{closeInfo();onContact();}}>Say hello <ArrowUpRight size={16} /></button></div>
+      <nav className="space-navigation" aria-label="Explore by theme">{mapCategories.map(category => <button key={category.id} aria-pressed={filter === category.id} onClick={()=>chooseCategory(category.id)} style={{"--node-color":category.id === "all" ? colors.person : colors[category.id]} as CSSProperties}><i />{category.label}</button>)}</nav>
+    </header>
 
     <div className={`story-space scatter-stage ${sceneReady ? "has-3d" : ""}`} id="atlas-explorer" onPointerDown={event => { const target = event.target as HTMLElement; if (!target.closest(".atlas-node,.space-popover,.space-header,.space-navigation")) closeInfo(); }}>
       <div className="space-glow" aria-hidden="true" />
@@ -197,7 +203,7 @@ export default function PersonalMap({ onContact }: { onContact: () => void }) {
         {labelPoints.map(point=>{
           const node=personalMap.find(chapter=>chapter.id===point.chapterId)!;
           const [x,y]=mapPosition(node,filter,capability.compact);
-          return <button key={point.id} ref={element=>{labels.current[point.id]=element;}} className={`atlas-node node-${point.kind} ${point.isChapter?"scatter-chapter":"scatter-word"} ${activeId===point.id?"is-selected":""}`} style={{"--node-color":colors[point.kind],left:`${50+x*(capability.compact?38:40)}%`,top:`${50-y*33}%`} as CSSProperties} onPointerEnter={event=>{if(event.pointerType!=="touch")enterPoint(point.id);}} onPointerLeave={leavePoint} onFocus={()=>{if(suppressFocus.current){suppressFocus.current=false;return;}enterPoint(point.id);}} onBlur={leavePoint} onKeyDown={event=>navigateNodes(event,point.id)} onClick={()=>pinPoint(point.id)} aria-label={point.isChapter?`Explore ${node.id==="harry"?"Harry Tang":node.title}`:`Explore ${point.label} in ${node.title}`} aria-pressed={pinnedId===point.id} aria-describedby={previewId===point.id?"space-point-info":undefined} aria-haspopup="dialog"><span className="atlas-node-point" aria-hidden="true"/><span className="atlas-node-label">{point.label}</span></button>;
+          return <button key={point.id} ref={element=>{labels.current[point.id]=element;}} className={`atlas-node node-${point.kind} ${point.isChapter?"scatter-chapter":"scatter-word"} ${activeId===point.id?"is-selected":""}`} style={{"--node-color":colors[point.kind],left:`${50+x*(capability.compact?38:40)}%`,top:`${50-y*33}%`} as CSSProperties} onPointerEnter={event=>{if(event.pointerType!=="touch"&&!capability.compact)enterPoint(point.id);}} onPointerLeave={leavePoint} onPointerDown={()=>{if(capability.compact)pinPoint(point.id);}} onFocus={event=>{if(suppressFocus.current){suppressFocus.current=false;return;}if(event.currentTarget.matches(":focus-visible"))enterPoint(point.id);}} onBlur={leavePoint} onKeyDown={event=>navigateNodes(event,point.id)} onClick={()=>pinPoint(point.id)} aria-label={point.isChapter?`Explore ${node.id==="harry"?"Harry Tang":node.title}`:`Explore ${point.label} in ${node.title}`} aria-pressed={pinnedId===point.id} aria-describedby={previewId===point.id?"space-point-info":undefined} aria-haspopup="dialog"><span className="atlas-node-point" aria-hidden="true"/><span className="atlas-node-label">{point.label}</span></button>;
         })}
       </div>
     </div>

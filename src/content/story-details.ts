@@ -9,6 +9,87 @@ export type StoryDetails = {
 
 /** Editorial summaries based on the supplied CV and verified public coursework. */
 export const storyDetails: Record<string, StoryDetails> = {
+  vision: {
+    motion: "vision",
+    facts: [{ label: "Task", value: "20 image classes" }, { label: "Recorded score", value: "96.328% · Kaggle" }, { label: "Course placing", value: "20th / 393 · reported" }],
+    sections: [
+      { title: "The representation stays fixed; the learning loop changes", text: "The final system keeps DINOv3 ViT-H+/16 frozen and trains two small heads. A global token and averaged patch tokens form a 2,560-dimensional feature vector. Conservative pseudo-label selection and matched augmentation expose the heads to target-domain images without access to their hidden labels." },
+      { title: "Keep the evaluation boundaries visible", text: "The earlier baseline's 99.86% validation accuracy belongs to its 8,047/1,419 split. The final round uses all labelled images, so it has no independent validation score. Its 96.328% is a recorded Kaggle leaderboard result; repeated selection against that leaderboard limits conclusions about new data." },
+    ],
+    evidence: "Course placing is reported by Harry; scores and losses are retained in the project records and public README/notebook. The illustration explains the pipeline and runs no model. The full case study includes the research journey and saved training trace.",
+  },
+  evaluation: {
+    motion: "evaluation",
+    facts: [{ label: "Tools", value: "WEKA" }, { label: "Scope", value: "3 datasets · 4 model families" }, { label: "Focus", value: "Evaluation & representation" }],
+    sections: [
+      { title: "Same accuracy, different mistakes", text: "On the 699-record classification benchmark, k-NN with K=3 and K=5 both classified 677 records correctly in ten-fold cross-validation. Yet false negatives changed from 10 to 8 and false positives from 12 to 14. On the second classification dataset, ordinal encoding changed neighbours without consistently improving performance." },
+      { title: "What counts as future data?", text: "For the 21-record economic series, I trained on 1986–2000 and tested on 2001–2006. Saved RMSE was 5.1295 unemployment percentage points, compared with 1.1705 for random ten-fold cross-validation. The protocols use different training sizes and test different kinds of generalisation; the small sample warrants caution." },
+    ],
+    evidence: "Figures come from saved WEKA outputs, not a new run. This is an educational comparison of supplied datasets, with no clinical validation. Private records and reports are not embedded; the animation shows original example partitions.",
+  },
+  bayesian: {
+    motion: "bayesian",
+    facts: [{ label: "Approach", value: "Bayesian networks" }, { label: "Tools", value: "Python / Netica" }, { label: "Setting", value: "Synthetic-data study" }],
+    sections: [
+      { title: "Keep learning and evaluation apart", text: "The workflow connects preprocessing, parameter learning, inference, simulated annealing and evaluation. Four network structures share a split of 96 tuning cases and 24 reserved cases, making it possible to compare initial, learned and tuned models on the same held-out evidence." },
+      { title: "Look at what accuracy leaves out", text: "All four tuned models predicted NoAlert for every reserved case. Their 58.33% accuracy hid zero recall for the ten Investigate cases. The decision-network extension added another question: how do the assumed costs and benefits of actions change the preferred choice?" },
+    ],
+    evidence: "Saved results from synthetic-data coursework; no clinical validation or causal findings. Netica and the supplied expert network are credited on the project page. Solution code and models stay private. The animation uses illustrative values, not case results.",
+  },
+  flatland: {
+    motion: "flatland",
+    facts: [{ label: "Setting", value: "Monash · FIT5222" }, { label: "Approach", value: "Space-time A* & LNS" }, { label: "Saved run", value: "56 server cases" }],
+    sections: [
+      { title: "The route belongs to more than one train", text: "Track direction limits where a train can go. Reservations add when it can go there. I used these constraints to coordinate shared cells and movements, then worked on a large-neighbourhood loop that reconsiders interacting trains together." },
+      { title: "A valid schedule can still be late", text: "Malfunctions turn a plan into a repair problem. The saved server run completed 2,827 of 2,832 trains, but five remained unfinished. In one congested 150-train case, every train finished and only 12 arrived before their deadlines. Those results made punctuality and congestion important questions for the next iteration." },
+    ],
+    evidence: "Results describe a retained server evaluation, not a new run. Built in the provided Piglet / Flatland environment; solution code stays private. The animation is an original example schedule, not a solver replay.",
+  },
+  pacman: {
+    motion: "pacman",
+    facts: [{ label: "Setting", value: "Monash · FIT5047" }, { label: "Language", value: "Python" }, { label: "Focus", value: "Search & decisions" }],
+    sections: [
+      { title: "One maze, different questions", text: "Finding one food dot, planning a route through several and responding to ghosts need different ways of thinking. I used A* and maze-distance heuristics for navigation, then combined dynamic programming and a greedy fallback for food-route planning." },
+      { title: "How far ahead should an agent look?", text: "The adversarial agent uses alpha-beta search, move ordering and adaptive depth to balance useful foresight with computation time. Selective ghost exploration reduces the work further, with the trade-off that it approximates the full adversarial search." },
+    ],
+    evidence: "Built in the provided UC Berkeley Pac-Man framework for Monash coursework. Solution code stays private. This original maze illustration explains the idea; it is not a recording or execution of the submitted agent.",
+  },
+  classifier: {
+    motion: "classifier",
+    facts: [{ label: "Task", value: "24 image classes" }, { label: "Framework", value: "TensorFlow / Keras" }, { label: "Saved test", value: "81.76% · SELU" }],
+    sections: [
+      { title: "Compare the choices inside a model", text: "This notebook studies sign-language letter images using dense neural networks. It compares batch normalisation with a SELU / AlphaDropout design, then explores Monte Carlo dropout and learning-rate scheduling." },
+      { title: "Keep the experiment honest", text: "The saved outputs show test accuracy around 81.8%, below some of the recorded validation results. The MobileNet transfer-learning section is unfinished. That makes this a model-comparison story with useful results and a clear next step." },
+    ],
+    evidence: "Accuracy comes from the saved notebook outputs, not a new training run. The animation illustrates the workflow and does not run a model.",
+  },
+  systems: {
+    motion: "shell",
+    facts: [{ label: "Language", value: "C / Unix" }, { label: "Focus", value: "Processes & pipes" }, { label: "Setting", value: "Coursework" }],
+    sections: [
+      { title: "A command is a chain of mechanisms", text: "The shell exercises move from tokenising input to creating processes, executing programs and connecting file descriptors. The larger version includes code for pipes, redirection and wildcard expansion; the mini shell adds a smaller view of process and signal handling." },
+      { title: "Look beyond the default branch", text: "Related operating-systems work lives on separate coursework branches. It includes memory-simulation code with LRU and Clock logic, reference traces and a small threaded TCP-server exercise. These are independent learning projects, rather than one operating-system product." },
+    ],
+    evidence: "The shell work includes course scaffold code. Source files and branches were inspected; the programs have not been built or run in this website update.",
+  },
+  booking: {
+    motion: "booking",
+    facts: [{ label: "Stage", value: "Prototype" }, { label: "Server", value: "Express / Node.js" }, { label: "Database", value: "MySQL" }],
+    sections: [
+      { title: "One flow, three layers", text: "The browser pages connect to Express routes and a MySQL schema. Accounts, sessions, room information and reservation records turn a simple booking idea into a full-stack application exercise." },
+      { title: "The next iteration is reliability", text: "The source contains the main account and booking routes, with work still to do on password handling, booking dates and availability queries. I am presenting it as a prototype that can grow through better validation and tests." },
+    ],
+    evidence: "The project is a source-available prototype. The illustration shows an example booking flow, rather than a live reservation service.",
+  },
+  games: {
+    motion: "games",
+    facts: [{ label: "Medium", value: "MATLAB graphics" }, { label: "Interaction", value: "Mouse callbacks" }, { label: "Air battle", value: "40 Hz timer configured" }],
+    sections: [
+      { title: "Make a rule visible", text: "The grid puzzle updates a clicked cell and its neighbours, redraws image tiles and counts moves. The air-battle game connects mouse input, plane and projectile sprites, and a timed update loop." },
+      { title: "Code can also be something to play", text: "These experiments bring a more playful side into the map. State changes become movement and feedback on screen, giving programming a different setting from databases, parsers or model training." },
+    ],
+    evidence: "The source contains two separate MATLAB experiments. The animation is a browser illustration; the games themselves run in MATLAB.",
+  },
   harry: {
     facts: [{ label: "Based in", value: "Melbourne" }, { label: "Now", value: "AI at Monash" }, { label: "Before", value: "Computer science at Adelaide" }],
     sections: [
@@ -101,4 +182,13 @@ export const projectStoryIds: Record<string, string> = {
   "attendance-system": "attendance",
   "vm-converter": "vm",
   "cpp-sorting-search": "cpp",
+  "sign-language-classifier": "classifier",
+  "unix-systems": "systems",
+  "hotel-booking": "booking",
+  "matlab-games": "games",
+  "pacman-ai": "pacman",
+  "flatland-train-scheduling": "flatland",
+  "bayesian-decision-analysis": "bayesian",
+  "weka-model-evaluation": "evaluation",
+  "dinov3-image-classification": "vision",
 };

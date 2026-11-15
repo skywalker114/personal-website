@@ -3,6 +3,12 @@
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { bubbleSortFrames, sortExample, type ProjectMotionKind } from "@/lib/project-motion";
+import { BookingDiagram, ClassifierDiagram, GamesDiagram, ShellDiagram } from "./github-project-diagrams";
+import PacmanDiagram from "./pacman-diagram";
+import FlatlandDiagram from "./flatland-diagram";
+import BayesianDiagram from "./bayesian-diagram";
+import EvaluationDiagram from "./evaluation-diagram";
+import VisionDiagram from "./vision-diagram";
 
 const sortFrames = bubbleSortFrames(sortExample);
 const stories = {
@@ -25,6 +31,51 @@ const stories = {
     title: "Watch the order emerge",
     description: "A working bubble-sort trace showing comparisons and swaps on five example values.",
     steps: [],
+  },
+  classifier: {
+    title: "From pixels to a class",
+    description: "An illustrative image-classification pipeline connecting image preparation, a dense network and example class scores.",
+    steps: ["Prepare a 28 × 28 image and its class label.", "Flatten and scale the input for a dense network.", "Compare network designs and training strategies.", "Evaluate predictions on held-out test data."],
+  },
+  shell: {
+    title: "Follow a command through the shell",
+    description: "An illustrated Unix pipeline with two child processes, a pipe and standard output.",
+    steps: ["Split an example command into programs and arguments.", "Create child processes and connect file descriptors.", "Send the first program’s output through a pipe.", "Write matching lines to standard output."],
+  },
+  booking: {
+    title: "A request across three layers",
+    description: "An illustrated hotel-booking prototype connecting a browser, Express routes and MySQL tables.",
+    steps: ["Explore a room through the browser interface.", "An account session identifies the user.", "An Express route handles the reservation request.", "A booking record connects a user and a room."],
+  },
+  games: {
+    title: "A small rule becomes an interaction",
+    description: "Illustrative MATLAB game mechanics: a grid click updates neighbouring cells, while a timer moves a plane.",
+    steps: ["A mouse click selects a cell on the puzzle grid.", "Update the selected cell and its neighbours, then redraw.", "A repeating timer advances the air-battle game loop.", "Mouse input and frame updates keep the scene moving."],
+  },
+  pacman: {
+    title: "A route is only part of the decision",
+    description: "An original schematic of a Pac-Man-style maze: an agent considers routes, food and a ghost before moving. This is an illustration, not actual gameplay.",
+    steps: ["Read the walls, food and agent positions.", "Compare possible routes around the maze.", "Consider ghost threats alongside the route to food.", "Choose a move, then assess the next state."],
+  },
+  flatland: {
+    title: "A breakdown changes more than one route",
+    description: "An original schematic of two trains sharing a junction. A breakdown extends one reservation, the other train waits, and repaired timings let movement resume. This is not a solver replay.",
+    steps: ["Plan routes and reserve time on shared tracks.", "A stopped train disrupts the junction schedule.", "Reconsider affected trains and reserve new timings.", "Resume movement using the repaired schedule."],
+  },
+  bayesian: {
+    title: "Evidence informs beliefs. Utilities guide choices.",
+    description: "An original generic illustration of evidence updating beliefs, followed by an illustrative ranking of three options. Changing utility assumptions changes the preferred option. Values do not represent medical cases or project results.",
+    steps: ["Start with observed evidence and unknown information.", "Update beliefs using the network's conditional probabilities.", "Compare expected utilities under the chosen assumptions.", "Change utility assumptions and inspect how the ranking moves."],
+  },
+  evaluation: {
+    title: "The split is part of the experiment",
+    description: "An original schematic contrasting an example mixed-year validation partition with an earlier-training, later-testing partition. Highlighted blocks are illustrative and contain no project records.",
+    steps: ["Inspect the data, feature types and baseline.", "Compare models and settings using held-out folds.", "For forecasting, keep later years out of training.", "Read class-level and regression errors before choosing a model."],
+  },
+  vision: {
+    title: "Learn from the image, then test the learning loop",
+    description: "An original schematic of the final DINOv3 H+ pipeline: three image views, a frozen feature encoder, linear and MLP heads, and gated pseudo-label feedback. The highlighted output class is illustrative.",
+    steps: ["Inspect original, flipped and JPEG image views.", "Extract features with a frozen pretrained DINOv3 H+ encoder.", "Train small heads and blend their class probabilities.", "Gate pseudo-labels before using them in a later training round."],
   },
 };
 
@@ -133,9 +184,9 @@ export default function ProjectMotion({ kind, compact = false }: { kind: Project
   return <figure ref={figure} className={`project-motion ${compact ? "is-compact" : ""}`} data-kind={kind} data-running={running && visible && pageVisible}>
     <div className="motion-heading"><span>{story.title}</span><div><button onClick={() => { setFrame(0); }} aria-label="Restart project illustration" title="Restart illustration"><RotateCcw size={13} /></button><button onClick={() => setPlayback(running ? "paused" : "playing")} aria-label={running ? "Pause project illustration" : "Play project illustration"} title={running ? "Pause illustration" : "Play illustration"}>{running ? <Pause size={13} /> : <Play size={13} />}</button></div></div>
     <svg viewBox="0 0 560 240" role="img" aria-label={story.description}>
-      {kind === "ctf" ? <CtfDiagram step={current} /> : kind === "attendance" ? <AttendanceDiagram step={current} /> : kind === "vm" ? <VmDiagram step={current} /> : <SortDiagram frameIndex={current} />}
+      {kind === "ctf" ? <CtfDiagram step={current} /> : kind === "attendance" ? <AttendanceDiagram step={current} /> : kind === "vm" ? <VmDiagram step={current} /> : kind === "classifier" ? <ClassifierDiagram step={current} /> : kind === "shell" ? <ShellDiagram step={current} /> : kind === "booking" ? <BookingDiagram step={current} /> : kind === "games" ? <GamesDiagram step={current} /> : kind === "pacman" ? <PacmanDiagram step={current} /> : kind === "flatland" ? <FlatlandDiagram step={current} /> : kind === "bayesian" ? <BayesianDiagram step={current} /> : kind === "evaluation" ? <EvaluationDiagram step={current} /> : kind === "vision" ? <VisionDiagram step={current} /> : <SortDiagram frameIndex={current} />}
     </svg>
     <figcaption><span className="motion-step-number">{String(current + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}</span><p>{kind === "sorting" ? sortFrames[current].caption : story.steps[current]}</p></figcaption>
-    <small className="motion-disclaimer">{kind === "sorting" ? "Live algorithm illustration · example values" : "Illustrated workflow · example data"}</small>
+    <small className="motion-disclaimer">{kind === "sorting" ? "Live algorithm illustration · example values" : kind === "pacman" ? "Original schematic · example maze · not a gameplay recording" : kind === "flatland" ? "Original schematic · example schedule · not a solver replay" : kind === "bayesian" ? "Original schematic · illustrative values · not case results" : kind === "evaluation" ? "Original schematic · example partitions · not actual records" : kind === "vision" ? "Original schematic · example image · no live model inference" : "Illustrated workflow · example data"}</small>
   </figure>;
 }

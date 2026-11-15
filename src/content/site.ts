@@ -1,4 +1,4 @@
-/** Personal content from Harry's CV and verified profiles. See CONTENT_SOURCES.md. */
+/** Personal content from Harry's CV, profiles and reviewed work. See CONTENT_SOURCES.md. */
 export const profile = {
   name: "Harry",
   fullName: "Shaoxuan (Harry) Tang",
@@ -50,11 +50,25 @@ export const experience = [
 
 export const toolkit = [
   { label: "Code & data", tools: "Python · C++ · C · R · MATLAB · Bash" },
+  { label: "Machine learning", tools: "PyTorch · TensorFlow / Keras · Transformers · WEKA · Netica" },
   { label: "Web & backend", tools: "JavaScript · Node.js · PHP · Spring Boot · Vue · SQL" },
   { label: "Systems & analytics", tools: "Linux · MySQL · Oracle RAC · Kettle ETL · FineBI" },
 ];
 
-export const projects = [
+export type Project = {
+  slug: string; title: string; shortTitle: string; category: string; number: string;
+  visual: string; role: string; description: string; tags: string[]; outcome: string;
+  overview: string; contributions: string[]; perspective: string; repository: string;
+  status?: string; featured?: boolean; contributionHeading?: string;
+  metrics?: { value: string; label: string; context?: string }[];
+  resources?: { label: string; url: string }[];
+  attribution?: { text: string; label: string; url: string };
+  spotlight?: boolean;
+  journey?: { title: string; text: string }[];
+  trainingTrace?: { description: string; rows: { epoch: number; linear: string; mlp: string }[]; note: string };
+};
+
+export const projects: Project[] = [
   {
     slug: "ctf-platform",
     title: "A place to learn by breaking things",
@@ -119,6 +133,175 @@ export const projects = [
     perspective: "A short sequence is enough to make an algorithm tangible. Seeing the comparisons, swaps and stopping conditions makes the source easier to reason about.",
     repository: "https://github.com/skywalker114/prac7",
   },
+  {
+    slug: "sign-language-classifier",
+    title: "Learning to recognise a sign",
+    shortTitle: "Sign-language image classifier",
+    category: "MACHINE LEARNING & VISION",
+    number: "05", visual: "classifier", status: "Notebook project", featured: true,
+    role: "Developer · Machine-learning coursework",
+    description: "A 24-class Sign Language MNIST study comparing dense neural networks, normalisation, dropout and learning-rate strategies in TensorFlow/Keras.",
+    tags: ["TensorFlow / Keras", "Image classification", "Model evaluation"],
+    outcome: "Saved notebook outputs report 81.75% test accuracy for the batch-normalised model and 81.76% for the SELU model.",
+    overview: "The notebook explores how training choices affect recognition of sign-language letter images. It prepares 28 × 28 images, compares two dense-network designs, and records training and test results. The focus is a controlled learning experiment with 24 image classes.",
+    contributions: ["Prepared image arrays and labels from Sign Language MNIST CSV data.", "Worked with batch normalisation and a SELU / AlphaDropout network.", "Explored Monte Carlo dropout and learning-rate scheduling.", "Recorded model evaluations and began a MobileNetV3Small transfer-learning extension."],
+    perspective: "The interesting story is the comparison between methods, including the gap between validation and test results. A careful account of what worked and what remains unfinished makes the experiment useful to learn from.",
+    repository: "https://github.com/skywalker114/sign-language-classifier",
+    metrics: [{ value: "24", label: "Image classes" }, { value: "28 × 28", label: "Input image size" }, { value: "81.76%", label: "SELU test accuracy", context: "Saved notebook output" }],
+    resources: [{ label: "Read the notebook", url: "https://github.com/skywalker114/sign-language-classifier/blob/main/UMLT_A3v2.ipynb" }],
+  },
+  {
+    slug: "unix-systems",
+    title: "What happens after a command?",
+    shortTitle: "Unix shells & systems coursework",
+    category: "OPERATING SYSTEMS & C",
+    number: "06", visual: "shell", status: "Coursework", featured: true,
+    role: "Developer · Systems coursework",
+    description: "C shell exercises exploring processes, command execution, pipes and redirection, alongside memory-simulation coursework on separate branches.",
+    tags: ["C / Unix", "Processes & pipes", "Memory simulation"],
+    outcome: "Public shell implementations and branch-based coursework make process handling and memory replacement visible in source code.",
+    overview: "The shell repositories explore the mechanisms underneath a command-line interface: splitting input, creating a child process, executing a program and handling its output. Related operating-systems coursework adds memory simulation and a small threaded TCP-server exercise.",
+    contributionHeading: "Inside the repositories",
+    contributions: ["Shell variants use fork, execvp and wait for command execution.", "The larger shell includes code paths for pipelines, input/output redirection and wildcard expansion.", "The mini shell includes cd, background-process handling and SIGCHLD handling, built from course skeleton code.", "The memory-simulation branch contains LRU and Clock logic, reference traces and separate C, Java and Python artifacts."],
+    perspective: "A short command hides coordination between processes, file descriptors and memory. These exercises make those mechanisms concrete, one layer below the applications that rely on them.",
+    repository: "https://github.com/skywalker114/unix-shell",
+    resources: [{ label: "Mini Unix shell", url: "https://github.com/skywalker114/mini-unix-shell" }, { label: "Memory-simulation branch", url: "https://github.com/skywalker114/Operating-System/tree/Practial-2" }, { label: "Threaded TCP-server exercise", url: "https://github.com/skywalker114/Operating-System/tree/Practical-3" }],
+  },
+  {
+    slug: "hotel-booking",
+    title: "From a room to a reservation",
+    shortTitle: "Hotel booking web application",
+    category: "FULL-STACK WEB DEVELOPMENT",
+    number: "07", visual: "booking", status: "Prototype", featured: true,
+    role: "Developer · Web application project",
+    description: "An Express and MySQL prototype connecting account pages, sessions, room listings and reservation records.",
+    tags: ["Express / Node.js", "MySQL", "Sessions & routing"],
+    outcome: "A source-available prototype with client pages, account/session routes, booking routes and a database schema.",
+    overview: "This application brings together a browser interface and a relational database. The repository includes registration and login pages, room-listing logic, session checks, reservation routes and SQL schema material.",
+    contributions: ["Connected browser pages to Express route handlers.", "Worked with MySQL queries for user, room and booking information.", "Added session-based account flows and views of recent and upcoming reservations.", "Included SQL schema files and a database model alongside the web application."],
+    perspective: "A booking flow crosses the interface, server and database. The next iteration is about making the whole path reliable: improving password handling, validating booking dates and testing availability queries.",
+    repository: "https://github.com/skywalker114/hotel-booking-web-app",
+    resources: [{ label: "Database schema", url: "https://github.com/skywalker114/hotel-booking-web-app/blob/main/Hotel_Booking.sql" }],
+  },
+  {
+    slug: "matlab-games",
+    title: "A few rules. Something to play.",
+    shortTitle: "MATLAB interactive games",
+    category: "CREATIVE CODING & INTERACTION",
+    number: "08", visual: "games", status: "Coding experiments", featured: true,
+    role: "Developer · MATLAB game projects",
+    description: "Two graphical experiments: a click-based grid puzzle and an air-battle game with sprites, mouse input and a timed update loop.",
+    tags: ["MATLAB", "Game loops", "Interactive graphics"],
+    outcome: "Source-available graphical experiments covering game state, input callbacks, drawing and timer-based updates.",
+    overview: "These projects use MATLAB as an environment for interaction and play. One changes a grid according to local click rules and counts moves. The other uses image sprites, mouse movement and a game timer to create an air-battle scene.",
+    contributions: ["Worked with grid setup, randomisation, click callbacks and move counting in the puzzle.", "Used neighbour-update rules to change the puzzle's state and redraw its image grid.", "Built an air-battle scene from background, plane and projectile sprites.", "Connected mouse callbacks and a configured 40 Hz timer to the game loop."],
+    perspective: "These are a different side of programming: a small change in state becomes something visible on screen. The projects connect logic with feedback, movement and the experience of playing.",
+    repository: "https://github.com/skywalker114/matlab-air-battle",
+    resources: [{ label: "Grid puzzle source", url: "https://github.com/skywalker114/matlab-sliding-puzzle" }],
+  },
+  {
+    slug: "pacman-ai",
+    title: "A maze of small decisions",
+    shortTitle: "Pac-Man: Search & Decision-Making",
+    category: "AI SEARCH & PLANNING",
+    number: "09", visual: "pacman", status: "Coursework · Private code", featured: true,
+    role: "Developer · FIT5047 coursework at Monash",
+    description: "Python search agents exploring maze navigation, food-route planning and decisions against ghosts in a provided Pac-Man environment.",
+    tags: ["A* search", "Adversarial search", "Python"],
+    outcome: "Implemented navigation solvers, a hybrid food-route planner and an adaptive-depth alpha-beta agent within the course framework.",
+    overview: "A familiar maze becomes a way to explore different AI problems. Reaching one food dot calls for pathfinding. Collecting several introduces route planning and a trade-off between reward and movement. Add ghosts, and every move must account for what another agent might do next. My FIT5047 coursework connects these three settings through Python implementations in a provided Pac-Man environment.",
+    contributions: ["Implemented A* navigation with Manhattan and wall-aware maze-distance heuristics.", "Combined subset dynamic programming for smaller food sets with a greedy route-planning fallback for larger ones.", "Built an alpha-beta agent with move ordering, adaptive search depth and selective ghost exploration.", "Designed evaluation features balancing food progress, ghost danger, capsules and endgame movement."],
+    perspective: "This project made computation part of the decision itself: deeper search can reveal more, but it also costs time. The interesting work was choosing what to explore, what to approximate and how to explain the trade-offs. Selective ghost exploration makes the agent practical, while giving up the guarantee of exact full minimax search.",
+    repository: "",
+    attribution: { text: "Completed as Monash FIT5047 coursework using the UC Berkeley Pac-Man AI framework. My work focuses on the search solvers and agent logic; the original game environment and teaching framework were provided. The solution code remains private.", label: "UC Berkeley Pac-Man projects", url: "https://inst.eecs.berkeley.edu/~cs188/fa26/projects/" },
+  },
+  {
+    slug: "flatland-train-scheduling",
+    title: "When routes have to agree",
+    shortTitle: "Flatland: Train Scheduling & Replanning",
+    category: "MULTI-AGENT PLANNING",
+    number: "10", visual: "flatland", status: "Coursework · Private code", featured: true,
+    role: "Developer · FIT5222 coursework at Monash",
+    description: "A Python railway planner coordinating shared tracks, deadlines and train malfunctions with space-time A* and large-neighbourhood search.",
+    tags: ["Multi-agent planning", "A* & LNS", "Python"],
+    outcome: "A retained 56-case server evaluation recorded 2,827 of 2,832 trains reaching their targets (99.82%), with 2,489 deadlines met. These figures describe the historical server run.",
+    overview: "A route can work for one train and still block everyone behind it. This FIT5222 project moves from single-train pathfinding to coordinated railway schedules, then adds deadlines and unexpected breakdowns. I worked on the Python planning and repair logic inside the provided Piglet and Flatland coursework environment.",
+    contributions: ["Implemented direction-aware pathfinding and time-expanded A* with track-occupancy reservations.", "Handled shared-cell and head-on movement conflicts while coordinating multiple trains.", "Developed a large-neighbourhood improvement loop that rebuilds interacting routes with bounded A* repair.", "Worked on malfunction recovery, preserving executed movement and required waits while validating replacement schedules."],
+    perspective: "The project shifted my attention from finding a good individual path to understanding the effect of one plan on another. Completion, punctuality and computation time all matter. A useful next step is tracing congested cases and comparing objectives under fixed search budgets, rather than treating one score as the whole result.",
+    repository: "",
+    metrics: [{ value: "56", label: "Server cases", context: "Retained evaluation" }, { value: "99.82%", label: "Trains completed", context: "2,827 / 2,832 trains" }, { value: "150", label: "Largest case", context: "Trains in one scenario" }],
+    attribution: { text: "Completed as Monash FIT5222 coursework using the provided Piglet scaffold and ShortestPathLab's Flatland railway simulator. My contribution is the planning and replanning logic. The solver adapts large-neighbourhood search ideas; it does not claim to reproduce a published algorithm exactly. Coursework solution code remains private.", label: "Flatland simulation framework", url: "https://github.com/ShortestPathLab/flatland" },
+  },
+  {
+    slug: "bayesian-decision-analysis",
+    title: "Reasoning with incomplete evidence",
+    shortTitle: "Bayesian Networks & Decision Analysis",
+    category: "PROBABILISTIC REASONING",
+    number: "11", visual: "bayesian", status: "Coursework · Private code", featured: true,
+    role: "Developer · FIT5047 coursework at Monash",
+    description: "A Python and Netica study comparing Bayesian networks, tuning probabilities and examining utility-based decisions using synthetic vaccine-safety records.",
+    tags: ["Bayesian networks", "Decision analysis", "Python / Netica"],
+    outcome: "All four tuned networks achieved 58.33% accuracy on 24 reserved synthetic cases while predicting NoAlert for every case. None detected the ten Investigate cases. Tuning improved log loss, but the class-level results exposed a significant limitation.",
+    overview: "This project explores how to reason when evidence is incomplete and decisions have different costs. I compared a naive Bayes network, two student-designed causal-hypothesis structures and a supplied expert network, then extended a tuned model into a decision network. The setting is synthetic vaccine-safety data: an educational modelling study with no clinical validation or established causal findings.",
+    contributions: ["Built configurable preprocessing that maps records into each network's states and handles missing evidence.", "Designed and revised student network structures and compared them with a supplied expert model.", "Connected Netica's EM parameter learning and case-by-case inference through a Python workflow.", "Implemented simulated annealing for selected conditional probabilities and a decision threshold, keeping tuning cases separate from evaluation.", "Compared saved held-out predictions and explored how assumed utilities affect choices in a decision network."],
+    perspective: "A probability estimate and a decision answer different questions. Expected utility makes the assumed costs of actions explicit. This project taught me to inspect class-level behaviour alongside summary metrics and to ask how a recommendation changes when its utility assumptions change. The graphs express modelling hypotheses; the synthetic observations do not establish causation.",
+    repository: "",
+    metrics: [{ value: "4", label: "Network structures", context: "Student and expert models" }, { value: "96", label: "Tuning cases", context: "Synthetic labelled records" }, { value: "24", label: "Held-out cases", context: "Reserved for evaluation" }],
+    attribution: { text: "Completed as Monash FIT5047 coursework using Norsys Netica, a supplied Python wrapper and an expert network provided by the course. My work covers student model design, preprocessing, learning and tuning workflows, evaluation and decision analysis. Coursework code and model files remain private. Results describe saved educational experiments on synthetic data.", label: "Norsys Netica", url: "https://www.norsys.com/netica.html" },
+  },
+  {
+    slug: "weka-model-evaluation",
+    title: "When the test changes the answer",
+    shortTitle: "Model Evaluation & Data Representation",
+    category: "APPLIED MACHINE LEARNING",
+    number: "12", visual: "evaluation", status: "Coursework · Evaluation study", featured: true,
+    role: "Modelling & analysis · FIT5047 coursework at Monash",
+    description: "A WEKA study of classification, data representation and regression, exploring how parameters, error types and time-aware testing affect model selection.",
+    tags: ["Model evaluation", "Data representation", "WEKA"],
+    outcome: "Saved experiments showed equal k-NN accuracy with different class errors, no consistent improvement from ordinal encoding, and much larger regression error on later-year testing than on random cross-validation. Each comparison exposed a different limit of a single summary score.",
+    overview: "Across two supplied classification datasets and a small economic time series, I used WEKA to compare J48 decision trees, naive Bayes, nearest neighbours and linear regression. The work combines parameter experiments, manual calculations, representation choices and evaluation design. It is a retrospective coursework study, with no clinical validation or deployed forecasting service.",
+    contributions: ["Compared decision trees, naive Bayes and k-NN using saved cross-validation results, majority baselines and confusion matrices.", "Examined how tree settings, neighbour counts and distance weighting changed model behaviour.", "Prepared an ordinal representation and analysed how encoding and scaling changed similarity between records.", "Compared mixed-year cross-validation with a chronological regression split: 15 earlier records for training and six later records for testing.", "Checked model explanations and calculations against saved WEKA outputs, including regression errors and class-specific trade-offs."],
+    perspective: "Representation and evaluation belong inside the modelling process. An ordered code introduces a distance assumption; a random fold answers a different question from a future-year test. This study helped me ask what a reported number actually measures and whether it matches the decision the model is meant to support. Small datasets limit how far these findings can generalise.",
+    repository: "",
+    metrics: [{ value: "3", label: "Datasets", context: "Classification and regression" }, { value: "4", label: "Model families", context: "WEKA implementations" }, { value: "10", label: "Validation folds", context: "Compared with later-year testing" }],
+    attribution: { text: "Completed as Monash FIT5047 coursework using the Weka Workbench from the University of Waikato and supplied datasets. My contribution is data preparation, experimental comparison, calculations and interpretation. The model implementations are provided by WEKA. Coursework reports and data files remain private; the illustration uses original example partitions.", label: "The Weka Workbench", url: "https://ml.cms.waikato.ac.nz/weka/" },
+  },
+  {
+    slug: "dinov3-image-classification",
+    title: "Learning what survives a change of view",
+    shortTitle: "DINOv3: Robust Image Classification",
+    category: "COMPUTER VISION & EXPERIMENTATION",
+    number: "13", visual: "vision", status: "Competition project · Public notebook", featured: true, spotlight: true,
+    role: "Developer · FIT5215 Deep Learning competition at Monash",
+    description: "A 20-class image-classification project spanning robustness audits, model ensembles and a final frozen-DINOv3 pipeline with iterative pseudo-label training.",
+    tags: ["Computer vision", "Self-training", "PyTorch / DINOv3"],
+    outcome: "The reported course placing was 20th out of 393 students. The selected Round 11 model recorded 96.328% Kaggle leaderboard accuracy, compared with 93.788% for the earlier H+ three-view baseline: a gain of 2.54 percentage points. These are recorded competition results.",
+    overview: "This project grew through two connected phases: a broad exploration of robustness and ensembles, followed by a rebuild around DINOv3 ViT-H+/16. The task was to classify 20 image categories using 9,466 labelled images and 11,681 unlabelled competition images. Appearance differences between the labelled and test sets made clean validation alone a weak guide. The work became a cycle of inspecting data, designing controlled comparisons, recording failures and refining the training and prediction pipeline.",
+    contributions: ["Audited appearance and feature-distribution differences, including resolution, grayscale, inversion and JPEG conditions.", "Explored transfer-learning, ensemble, restoration and domain-adaptation branches before selecting the later H+ approach.", "Built a frozen DINOv3 feature pipeline combining the global token and mean patch features into a normalised 2,560-dimensional representation.", "Trained linear and MLP heads with refreshed, agreement-filtered pseudo-labels and conservative loss weights.", "Matched augmentation options for genuinely labelled and pseudo-labelled images, then compared multi-view inference and head blends.", "Preserved checkpoint lineage, configurations, candidate diagnostics and genuine training outputs in the released notebook."],
+    perspective: "The most useful change was not always another training round. A same-head comparison that removed the prototype contribution and retuned the blend moved the recorded score from 95.912% to 96.211%. The final round added only 0.010 percentage points over its parent. I learned to examine what each experiment changes, keep useful failures in the record and separate local diagnostics from evidence of generalisation.",
+    repository: "https://github.com/skywalker114/dinov3-image-classification",
+    metrics: [{ value: "20th", label: "Course placing", context: "Of 393 students · reported" }, { value: "96.328", label: "Kaggle accuracy (%)", context: "Recorded leaderboard score" }, { value: "20", label: "Image classes", context: "9,466 labelled images" }],
+    resources: [{ label: "Read the notebook and training traces", url: "https://github.com/skywalker114/dinov3-image-classification/blob/main/best_model.ipynb" }, { label: "Project method and reproduction notes", url: "https://github.com/skywalker114/dinov3-image-classification/blob/main/README.md" }],
+    attribution: { text: "Completed for Monash FIT5215 using PyTorch and Meta's pretrained DINOv3 backbone. My work is the downstream classification, data audits, self-training experiments, evaluation and inference pipeline. The final H+ backbone stays frozen; I did not pretrain DINOv3. The public notebook retains saved head-training outputs and requires the original data, feature caches and parent checkpoint to rerun.", label: "Official DINOv3 ViT-H+/16 model", url: "https://huggingface.co/facebook/dinov3-vith16plus-pretrain-lvd1689m" },
+    journey: [
+      { title: "Explore representations and complementary errors", text: "The original workspace includes CNN and transformer baselines, DINOv2 and Perception Encoder ensembles, and grayscale/JPEG restoration and domain-adaptation experiments. These were research branches. The final reported model uses the later H+ pipeline." },
+      { title: "Audit the gap between training and test images", text: "I compared image appearances and feature distributions, inspected corruption conditions and checked alignment between cached features, labels and image identities. Original, flipped and JPEG views became part of the H+ representation and inference experiments." },
+      { title: "Rebuild around frozen DINOv3 H+ features", text: "A pretrained encoder produces global and patch features. I normalise their concatenation and train small linear and MLP classifiers. This keeps the large backbone fixed while letting the downstream heads adapt to the competition data." },
+      { title: "Refresh pseudo-labels with controlled trust", text: "The teacher must agree across both heads and all three views before an unlabelled image is eligible. Confidence and margin gates, per-class caps and low pseudo-label loss weights limit its influence. The selected final round uses 5,145 pseudo-labelled images alongside all 9,466 genuine labels." },
+      { title: "Make augmentation and blending part of the experiment", text: "Genuine and pseudo-labelled images receive the same augmentation options. The selected prediction recipe averages three views and combines 80.625% MLP with 19.375% linear-head probabilities. The source-prototype component has zero weight in the winner." },
+      { title: "Keep a verified winner while exploring further", text: "Later notebooks continue into additional rounds and shadow out-of-fold checks. The retained reported winner is still Round 11, seed 917503. Local candidate-priority scores help organise experiments; they are not estimates of Kaggle accuracy." },
+    ],
+    trainingTrace: {
+      description: "Saved weighted training losses for the selected Round 11 seed, 917503. These are two continuation epochs from a Round 10 parent checkpoint, with the DINOv3 backbone frozen.",
+      rows: [{ epoch: 1, linear: "0.163278", mlp: "0.159534" }, { epoch: 2, linear: "0.162407", mlp: "0.159788" }],
+      note: "The linear-head loss falls slightly; the MLP loss is nearly flat. These losses are training traces, not accuracy scores. No new training was run for this page.",
+    },
+  },
+];
+
+export const codeExperiments = [
+  { title: "Appointment-management backend", description: "An Express, Sequelize and MySQL prototype with appointment records, user routes and email notifications.", status: "Prototype", url: "https://github.com/skywalker114/yyserver-web-backend" },
+  { title: "C++ pets & tournament exercises", description: "Object-oriented exercises covering pet behaviour, inheritance, computer opponents and tournament code.", status: "Coursework", url: "https://github.com/skywalker114/cpp-artificial-pet" },
 ];
 
 export const publicCode = {

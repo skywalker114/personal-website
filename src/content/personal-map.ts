@@ -30,6 +30,16 @@ export const mapColors: Record<MapKind, string> = {
   person: "#efeee7", project: "#c3f5b5", work: "#c7b7f0", study: "#aacff2", life: "#e8c49a",
 };
 
+function repositoryProject(slug: string, id: string, label: string, position: [number, number, number]): MapNode {
+  const project = projects.find(item => item.slug === slug);
+  if (!project) throw new Error(`Missing project content: ${slug}`);
+  return {
+    id, kind: "project", label, title: project.shortTitle, subtitle: project.role,
+    description: project.description, detail: project.outcome, skills: project.tags,
+    href: `/projects/${slug}/`, linkLabel: "Explore the project", position, compactPosition: position,
+  };
+}
+
 export const personalMap: MapNode[] = [
   {
     id: "harry", kind: "person", label: "Harry Tang", title: profile.fullName,
@@ -106,9 +116,27 @@ export const personalMap: MapNode[] = [
     skills: ["Art & archaeology", "Research", "Academic writing"], href: `/notes/${notes[0].slug}/`, linkLabel: "Step beyond code",
     position: [.59, -.78, .2], compactPosition: [.72, -.62, .2],
   },
+  repositoryProject("sign-language-classifier", "classifier", "Sign-language AI", [-.3, .85, .6]),
+  repositoryProject("unix-systems", "systems", "Unix & systems", [-.87, -.43, .5]),
+  repositoryProject("hotel-booking", "booking", "Hotel booking", [.55, -.6, -.4]),
+  repositoryProject("matlab-games", "games", "MATLAB games", [.8, .62, -.5]),
+  repositoryProject("pacman-ai", "pacman", "Pac-Man AI", [-.5, .4, .75]),
+  repositoryProject("flatland-train-scheduling", "flatland", "Flatland trains", [-.4, -.4, .7]),
+  repositoryProject("bayesian-decision-analysis", "bayesian", "Bayesian reasoning", [.4, .15, -.7]),
+  repositoryProject("weka-model-evaluation", "evaluation", "Testing models", [.3, -.5, -.6]),
+  repositoryProject("dinov3-image-classification", "vision", "DINOv3 vision", [-.5, .2, .7]),
 ];
 
 export function mapPosition(node: MapNode, filter: MapFilter, compact: boolean): [number, number, number] {
+  const chapters = personalMap.filter(item => item.kind !== "person" && (filter === "all" || item.kind === filter));
+  // These positions serve the non-WebGL fallback. Leave room for the expanded
+  // project collection instead of piling new labels onto the old coordinates.
+  if (chapters.length > 4) {
+    if (node.kind === "person") return [0, .88, .9];
+    const rows = Math.ceil(chapters.length / 2);
+    const index = chapters.findIndex(item => item.id === node.id);
+    return [index < rows ? (compact ? -.64 : -.7) : (compact ? .64 : .7), .5 - (index % rows) * 1.5 / Math.max(1, rows - 1), node.position[2]];
+  }
   if (filter === "all") return compact ? node.compactPosition : node.position;
   if (node.kind === "person") return [0, 0, .9];
   const members = personalMap.filter(item => item.kind === filter);
@@ -124,6 +152,12 @@ export const mapConnections: [string, string][] = [
   ...personalMap.filter(node => node.id !== "harry").map(node => ["harry", node.id] as [string, string]),
   ["ctf", "attendance"], ["ctf", "vm"], ["vm", "cpp"],
   ["jiangsu", "glenunga"], ["glenunga", "gillibrand"], ["adelaide", "monash"],
+  ["classifier", "monash"], ["systems", "vm"], ["systems", "cpp"], ["booking", "attendance"], ["games", "cpp"],
+  ["pacman", "monash"], ["pacman", "cpp"], ["pacman", "games"],
+  ["flatland", "monash"], ["flatland", "pacman"], ["flatland", "cpp"],
+  ["bayesian", "monash"], ["bayesian", "classifier"], ["bayesian", "pacman"],
+  ["evaluation", "monash"], ["evaluation", "bayesian"], ["evaluation", "classifier"],
+  ["vision", "monash"], ["vision", "classifier"], ["vision", "evaluation"],
 ];
 
 export type CloudPoint = {
@@ -149,6 +183,15 @@ const storyCoordinates: Record<string, [number, number, number]> = {
   adelaide: [.25, -1.7, -.5],
   monash: [-.15, -1.25, 1.35],
   roman: [.6, 1.8, -.6],
+  classifier: [-.7, 1.55, 1.65],
+  systems: [-2.15, -1.2, .65],
+  booking: [1.55, -1.5, -.7],
+  games: [2.0, 1.5, -.9],
+  pacman: [-1.55, .45, -1.65],
+  flatland: [-.35, -.25, 2.2],
+  bayesian: [.65, .45, -2.0],
+  evaluation: [1.0, -1.3, -1.6],
+  vision: [-1.2, 1.15, -1.5],
 };
 
 export const cloudPoints: CloudPoint[] = personalMap.flatMap((node, nodeIndex) => {

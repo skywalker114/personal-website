@@ -1,4 +1,4 @@
-export type ProjectMotionKind = "ctf" | "attendance" | "vm" | "sorting";
+export type ProjectMotionKind = "ctf" | "attendance" | "vm" | "sorting" | "classifier" | "shell" | "booking" | "games" | "pacman" | "flatland" | "bayesian" | "evaluation" | "vision";
 
 export type SortFrame = {
   values: number[];
